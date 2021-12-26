@@ -1,4 +1,11 @@
 package org.vulcanrobotics.follower;
 
-public class Follower {
+import org.vulcanrobotics.path.Path;
+
+public abstract class Follower {
+
+    public Follower(Path path) {
+
+    }
+
 }
