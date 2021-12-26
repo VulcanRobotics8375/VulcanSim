@@ -13,6 +13,8 @@ public abstract class Path {
 
     public abstract Vector error();
 
+    //for time variant paths, this returns the target position at time t.
+    //for time invariant paths, this probs wont be used lmao
     public abstract Pose get(double t);
 
 
