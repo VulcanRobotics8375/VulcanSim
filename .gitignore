@@ -105,3 +105,6 @@ replay_pid*
 .gradle/
 .idea/misc.xml
 .idea/compiler.xml
+
+# MacOS stuff
+.DS_Store
