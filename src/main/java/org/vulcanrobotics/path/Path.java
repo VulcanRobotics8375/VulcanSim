@@ -8,10 +8,9 @@ public abstract class Path {
     /**
      * Path utilities that work with ALL PATHS
      * Do not edit this section
-     *
      */
 
-    public abstract Vector error();
+    public abstract Vector error(Pose robot);
 
     //for time variant paths, this returns the target position at time t.
     //for time invariant paths, this probs wont be used lmao
