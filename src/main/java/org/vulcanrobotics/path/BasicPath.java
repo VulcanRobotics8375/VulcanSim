@@ -71,7 +71,7 @@ public class BasicPath extends Path {
            x = points.get(i + 1).x;
         }
 
-
+        return null;
 
     }
 

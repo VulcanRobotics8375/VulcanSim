@@ -1,6 +1,8 @@
 plugins {
+    id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.0.9'
+    id 'org.openjfx.javafxplugin' version '0.0.10'
+    id 'org.beryx.jlink' version '2.24.1'
 }
 
 group 'org.vulcanrobotics'
@@ -8,21 +10,52 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    google()
 }
 
-dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
-    implementation 'org.apache.commons:commons-math3:3.6.1'
+ext {
+    junitVersion = '5.8.1'
+}
+
+sourceCompatibility = '16'
+targetCompatibility = '16'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+application {
+    mainModule = 'org.vulcanrobotics.ui'
+    mainClass = 'org.vulcanrobotics.ui.Main'
 }
 
 javafx {
-    version = "16"
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    version = '16'
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.web']
 }
 
-mainClassName = 'org.vulcanrobotics.Main'
+dependencies {
+    implementation 'org.apache.commons:commons-math3:3.6.1'
+    implementation('org.controlsfx:controlsfx:11.1.0')
+    implementation('eu.hansolo:tilesfx:11.48') {
+        exclude(group: 'org.openjfx')
+    }
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+}
 
 test {
     useJUnitPlatform()
+}
+
+jlink {
+    imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    launcher {
+        name = 'app'
+    }
+}
+
+jlinkZip {
+    group = 'distribution'
 }
