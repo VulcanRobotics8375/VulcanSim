@@ -1,4 +1,5 @@
-module org.vulcanrobotics.ui {
+module org.vulcanrobotics {
+    requires commons.math3;
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
@@ -6,8 +7,7 @@ module org.vulcanrobotics.ui {
     requires org.controlsfx.controls;
     requires eu.hansolo.tilesfx;
     requires java.desktop;
-    requires commons.math3;
 
-    opens org.vulcanrobotics.ui to javafx.fxml;
-    exports org.vulcanrobotics.ui;
+    opens org.vulcanrobotics to javafx.fxml;
+    exports org.vulcanrobotics;
 }

@@ -1,32 +1,42 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath 'org.openjfx:javafx-plugin:0.0.10'
+    }
+}
+
 plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.10'
     id 'org.beryx.jlink' version '2.24.1'
 }
+apply plugin: 'org.openjfx.javafxplugin'
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 16
+targetCompatibility = 16
 
 group 'org.vulcanrobotics'
 version '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-    google()
+java {
+    modularity.inferModulePath = true
 }
 
 ext {
     junitVersion = '5.8.1'
 }
 
-sourceCompatibility = '16'
-targetCompatibility = '16'
-
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
-}
-
-application {
-    mainModule = 'org.vulcanrobotics.ui'
-    mainClass = 'org.vulcanrobotics.ui.Main'
 }
 
 javafx {
@@ -37,9 +47,7 @@ javafx {
 dependencies {
     implementation 'org.apache.commons:commons-math3:3.6.1'
     implementation('org.controlsfx:controlsfx:11.1.0')
-    implementation('eu.hansolo:tilesfx:11.48') {
-        exclude(group: 'org.openjfx')
-    }
+    implementation('eu.hansolo:tilesfx:11.48')
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }
@@ -48,14 +56,11 @@ test {
     useJUnitPlatform()
 }
 
+mainClassName = "org.vulcanrobotics.Main"
+
 jlink {
-    imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
     launcher {
-        name = 'app'
+        name = 'VulcanSim'
     }
-}
-
-jlinkZip {
-    group = 'distribution'
 }
