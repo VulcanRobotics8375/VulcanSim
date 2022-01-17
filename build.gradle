@@ -13,6 +13,7 @@ plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.10'
+    id 'org.javamodularity.moduleplugin' version '1.8.8'
     id 'org.beryx.jlink' version '2.24.1'
 }
 apply plugin: 'org.openjfx.javafxplugin'
@@ -20,9 +21,6 @@ apply plugin: 'org.openjfx.javafxplugin'
 repositories {
     mavenCentral()
 }
-
-sourceCompatibility = 16
-targetCompatibility = 16
 
 group 'org.vulcanrobotics'
 version '1.0-SNAPSHOT'
