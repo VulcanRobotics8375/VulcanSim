@@ -12,6 +12,12 @@ public class Pose {
         this.heading = heading;
     }
 
+    public Pose() {
+        this.x = 0;
+        this.y = 0;
+        this.heading = 0;
+    }
+
     public Pose(Pose old) {
         this.x = old.x;
         this.y = old.y;

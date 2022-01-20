@@ -1,15 +1,24 @@
 package org.vulcanrobotics.sim;
 
+import org.vulcanrobotics.math.geometry.Pose;
+
 public abstract class RobotModel {
 
-    public double x, y, theta;
+    protected Pose robotPose = new Pose();
+    protected Pose robotPoseVelocity = new Pose();
+    protected Pose robotPoseAccel = new Pose();
 
-    public void updateDeltas(double dx, double dy, double dTheta) {
-        x += dx;
-        y += dy;
-        theta += dTheta;
-    }
+
 
     public abstract void update(double... powers) throws Exception;
+
+
+    //getter and setter for robotPose
+    public Pose getRobotPose() {
+        return robotPose;
+    }
+    public void setRobotPose(Pose newPose) {
+        robotPose = new Pose(newPose);
+    }
 
 }

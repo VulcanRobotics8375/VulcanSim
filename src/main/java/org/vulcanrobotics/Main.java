@@ -11,6 +11,7 @@ import org.apache.commons.math3.linear.MatrixUtils;
 import org.vulcanrobotics.math.geometry.Pose;
 import org.vulcanrobotics.math.geometry.Vector;
 import org.vulcanrobotics.sim.drivetrains.Mecanum;
+import org.vulcanrobotics.sim.motors.NeverestOrbital20;
 
 import javax.imageio.ImageIO;
 import java.io.FileInputStream;
@@ -60,6 +61,8 @@ public class Main extends Application {
         Mecanum mecanum = new Mecanum(4, 4, 1);
         Pose output = mecanum.calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(new double[] {1, -1, 1, -1}));
         System.out.println(output.x + ", " + output.y + ", " + output.heading);
+
+        NeverestOrbital20 motor = new NeverestOrbital20();
 
         launch();
     }
