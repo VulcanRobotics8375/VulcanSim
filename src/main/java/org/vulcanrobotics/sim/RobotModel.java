@@ -8,9 +8,8 @@ public abstract class RobotModel {
     protected Pose robotPoseVelocity = new Pose();
     protected Pose robotPoseAccel = new Pose();
 
-
-
     public abstract void update(double... powers) throws Exception;
+
 
 
     //getter and setter for robotPose

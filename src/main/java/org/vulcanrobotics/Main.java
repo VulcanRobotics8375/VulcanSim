@@ -58,7 +58,7 @@ public class Main extends Application {
 
     public static void main(String[] args) throws InterruptedException {
         System.out.println(System.getProperty("os.name"));
-        Mecanum mecanum = new Mecanum(4, 4, 1);
+        Mecanum mecanum = new Mecanum(4, 4, 1, new NeverestOrbital20[4]);
         Pose output = mecanum.calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(new double[] {1, -1, 1, -1}));
         System.out.println(output.x + ", " + output.y + ", " + output.heading);
 

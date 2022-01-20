@@ -7,18 +7,25 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.vulcanrobotics.math.geometry.Pose;
 import org.vulcanrobotics.math.geometry.Vector;
 import org.vulcanrobotics.sim.RobotModel;
+import org.vulcanrobotics.sim.motors.Motor;
 
 public class Mecanum extends RobotModel {
 
     private RealMatrix velocityMatrix;
     private RealMatrix wheelVelocityMatrix;
 
-    public Mecanum(double wheelBaseY, double wheelBaseX, double wheelRadius) {
+    private Pose targetVelocity;
+
+    private Motor[] motors;
+
+    public Mecanum(double wheelBaseY, double wheelBaseX, double wheelRadius, Motor[] motors) {
         wheelVelocityMatrix = constructMecanumWheelVelocityMatrix(wheelBaseY, wheelBaseX, wheelRadius);
         velocityMatrix = constructMecanumVelocityMatrix(wheelBaseY, wheelBaseX, wheelRadius);
-
-
-
+        if(motors.length != 4) {
+            //TODO error handler of some sort with UI to get rid of console error logs like this
+            System.out.println("mecanum needs 4 motors in its configuration");
+        }
+        this.motors = motors;
     }
 
     @Override
@@ -27,7 +34,7 @@ public class Mecanum extends RobotModel {
             throw new Exception("mecanum requires 4 motor powers");
         }
 
-        Pose targetPoseVelocity = calculateRobotVelocity(MatrixUtils.createRowRealMatrix(powers));
+        targetVelocity = calculateRobotVelocity(MatrixUtils.createRowRealMatrix(powers));
 
     }
 
