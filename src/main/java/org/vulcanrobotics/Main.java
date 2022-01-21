@@ -56,13 +56,21 @@ public class Main extends Application {
        return new Pose(robotPose.x * (pixelsPerInch), (robotPose.y * (pixelsPerInch)), robotPose.heading);
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        System.out.println(System.getProperty("os.name"));
-        Mecanum mecanum = new Mecanum(4, 4, 1, new NeverestOrbital20[4]);
-        Pose output = mecanum.calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(new double[] {1, -1, 1, -1}));
-        System.out.println(output.x + ", " + output.y + ", " + output.heading);
+    public static void main(String[] args) throws Exception {
+        NeverestOrbital20[] motors = new NeverestOrbital20[] {
+                new NeverestOrbital20(),
+                new NeverestOrbital20(),
+                new NeverestOrbital20(),
+                new NeverestOrbital20()
+        };
+        Mecanum mecanum = new Mecanum(4, 4, 3.77, 30, motors);
 
-        NeverestOrbital20 motor = new NeverestOrbital20();
+        mecanum.update(1, 1, 1, 1);
+//        mecanum.update(1, 1, 1, 1);
+//        mecanum.update(1, 1, 1, 1);
+//        mecanum.update(1, 1, 1, 1);
+        Pose outputPose = mecanum.getRobotPose();
+        System.out.println(outputPose.x + ", " + outputPose.y + ", " + outputPose.heading);
 
         launch();
     }

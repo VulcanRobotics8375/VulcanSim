@@ -16,5 +16,4 @@ public @interface MotorType {
     double maxTorque();
     double backDriveTorque();
 
-
 }

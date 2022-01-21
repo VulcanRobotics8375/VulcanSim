@@ -4,6 +4,7 @@ public abstract class Motor {
 
     protected double speed;
     private final MotorType motorProperties;
+    private ZeroPowerBehavior zeroPowerBehavior;
 
     public Motor(Class<? extends Motor> motorSubClass) {
         motorProperties = motorSubClass.getAnnotation(MotorType.class);
@@ -19,6 +20,14 @@ public abstract class Motor {
 
     public MotorType getMotorProperties() {
         return motorProperties;
+    }
+
+    public void setZeroPowerBehavior(ZeroPowerBehavior zeroPowerBehavior) {
+        this.zeroPowerBehavior = zeroPowerBehavior;
+    }
+
+    public ZeroPowerBehavior getZeroPowerBehavior() {
+        return zeroPowerBehavior;
     }
 
 }
