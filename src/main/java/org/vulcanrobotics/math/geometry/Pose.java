@@ -54,5 +54,9 @@ public class Pose {
         return new Pose(this.x / scalar, this.y / scalar, this.heading / scalar);
     }
 
+    @Override
+    public String toString() {
+        return this.x + ", " + this.y + ", " + this.heading;
+    }
 
 }

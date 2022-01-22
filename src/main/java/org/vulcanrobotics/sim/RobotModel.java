@@ -7,6 +7,7 @@ public abstract class RobotModel {
     protected Pose robotPose = new Pose();
     protected Pose robotPoseVelocity = new Pose();
     protected Pose robotPoseAccel = new Pose();
+    protected double loopTime = 1.0 / 60.0;
 
     public abstract void update(double... powers) throws Exception;
 

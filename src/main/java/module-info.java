@@ -10,4 +10,5 @@ module org.vulcanrobotics {
 
     opens org.vulcanrobotics to javafx.fxml;
     exports org.vulcanrobotics;
+    exports org.vulcanrobotics.sim;
 }

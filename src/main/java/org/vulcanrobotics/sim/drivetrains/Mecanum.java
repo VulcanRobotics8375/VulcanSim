@@ -16,6 +16,8 @@ public class Mecanum extends RobotModel {
     private RealMatrix wheelVelocityMatrix;
 
     private double maxWheelAccel;
+    private double maxWheelAccelRad;
+    private double robotWeight;
 
     private Pose targetVelocity;
     private double[] targetWheelVelocities;
@@ -30,7 +32,9 @@ public class Mecanum extends RobotModel {
             System.out.println("mecanum needs 4 motors in its configuration");
         }
         this.motors = motors;
-        System.out.println(calculateMaxWheelAccel(wheelRadius, robotWeight, motors[0].getMotorProperties()));
+        this.robotWeight = robotWeight;
+        maxWheelAccel = calculateMaxWheelAccel(wheelRadius, robotWeight, motors[0].getMotorProperties());
+        System.out.println(maxWheelAccel);
     }
 
     @Override
@@ -42,7 +46,6 @@ public class Mecanum extends RobotModel {
         //might be able to make these local variables depending on how this goes
         targetWheelVelocities = powers;
         targetVelocity = calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(powers));
-        System.out.println(targetVelocity.x);
 
         double[] currentWheelVelocities = new double[] {
                 motors[0].getSpeed(),
@@ -52,15 +55,14 @@ public class Mecanum extends RobotModel {
         };
 
         for(int i = 0; i < 4; i++) {
-            double targetAccel = targetWheelVelocities[i] - currentWheelVelocities[i];
-            System.out.println(targetAccel);
-            currentWheelVelocities[i] += Math.abs(targetAccel) > maxWheelAccel ? maxWheelAccel * Math.signum(targetAccel) : targetAccel;
+            double targetAccel = (targetWheelVelocities[i] - currentWheelVelocities[i]);
+            currentWheelVelocities[i] += Math.abs(targetAccel) > (maxWheelAccel * loopTime) ? (maxWheelAccel * Math.signum(targetAccel) * loopTime) : targetAccel;
             motors[i].speed(currentWheelVelocities[i]);
         }
 
-        Pose velocityUpdate = calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(currentWheelVelocities));
-        System.out.println(currentWheelVelocities[0]);
-        setRobotPose(new Pose(1.0, 1.0, 1.0));
+        Pose velocityUpdate = calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(currentWheelVelocities).scalarMultiply(loopTime * (motors[0].getMotorProperties().maxRPM()) * (2.0 * Math.PI / 60.0)));
+        setRobotPose(robotPose.plus(velocityUpdate));
+        System.out.println(velocityUpdate);
     }
 
     private double calculateMaxWheelAccel(double wheelRadius, double robotWeight, MotorType motor) {
@@ -73,8 +75,8 @@ public class Mecanum extends RobotModel {
         //max accel in radians
         double maxWheelAccelRad = (4.0 * maxTorqueNM) / (robotMassKg * Math.pow(wheelRadMeters, 2));
 
-        double maxWheelAccelPercentage = maxWheelAccelRad / maxSpeedRad;
-        return maxWheelAccelPercentage;
+        //max accel in motor percentage
+        return maxWheelAccelRad / maxSpeedRad;
 
     }
 
