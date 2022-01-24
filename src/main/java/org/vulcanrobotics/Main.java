@@ -8,7 +8,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.apache.commons.math3.linear.MatrixUtils;
+import org.vulcanrobotics.follower.TestFollower;
 import org.vulcanrobotics.math.geometry.Pose;
+import org.vulcanrobotics.math.geometry.Vector;
+import org.vulcanrobotics.path.Path;
 import org.vulcanrobotics.sim.RobotModel;
 import org.vulcanrobotics.sim.drivetrains.Mecanum;
 import org.vulcanrobotics.sim.motors.NeverestOrbital20;
@@ -20,6 +23,7 @@ public class Main extends Application {
     public static ImageView robotView;
     int boardDimensions = 800;
     public static RobotModel model;
+    public static Runnable followerTask;
 
 
     @Override
@@ -37,23 +41,15 @@ public class Main extends Application {
         robotView.setFitHeight((800.0/144.0) * 18);
 
         new Thread(() -> {
-            int i = 0;
             model.setRobotPose(new Pose(50.0, 20.0, 0.0));
             while(true) {
-                i++;
-                    try {
-                        if(i < 60) {
-                            model.update(1.0, -1.0, -1.0, 1.0);
-                        } else if(i < 120) {
-                            model.update(-1.0, 1.0, 1.0, -1.0);
-                        } else {
-                            i = 0;
-                        }
-                        Thread.sleep(16);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                followerTask.run();
                 Platform.runLater(() -> setRobotPosition(model.getRobotPose()));
+                try {
+                    Thread.sleep(16);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }).start();
 
@@ -87,6 +83,29 @@ public class Main extends Application {
 //        Pose velocityOutTest = mecanum.calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(new double[] {2.0 * Math.PI, 2.0 * Math.PI, 2.0 * Math.PI, 2.0 * Math.PI}));
 //        System.out.println(velocityOutTest.toString());
         model = mecanum;
+        TestFollower follower = new TestFollower(new Path() {
+            @Override
+            public Vector error(Pose robot) {
+               return null;
+            }
+
+            @Override
+            public Pose get(double t) {
+                return null;
+            }
+
+            @Override
+            public Pose tangentVec(double t) {
+                return null;
+            }
+        }, mecanum);
+        followerTask = () -> {
+            try {
+                follower.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
         launch();
 
 
