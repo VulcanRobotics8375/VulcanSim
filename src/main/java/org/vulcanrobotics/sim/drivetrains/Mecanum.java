@@ -12,17 +12,13 @@ import org.vulcanrobotics.sim.motors.MotorType;
 
 public class Mecanum extends RobotModel {
 
-    private RealMatrix velocityMatrix;
-    private RealMatrix wheelVelocityMatrix;
+    private final RealMatrix velocityMatrix;
+    private final RealMatrix wheelVelocityMatrix;
 
-    private double maxWheelAccel;
-    private double maxWheelAccelRad;
+    private final double maxWheelAccel;
     private double robotWeight;
 
-    private Pose targetVelocity;
-    private double[] targetWheelVelocities;
-
-    private Motor[] motors;
+    private final Motor[] motors;
 
     public Mecanum(double wheelBaseY, double wheelBaseX, double wheelRadius, double robotWeight, Motor[] motors) {
         wheelVelocityMatrix = constructMecanumWheelVelocityMatrix(wheelBaseY, wheelBaseX, wheelRadius);
@@ -34,7 +30,8 @@ public class Mecanum extends RobotModel {
         this.motors = motors;
         this.robotWeight = robotWeight;
         maxWheelAccel = calculateMaxWheelAccel(wheelRadius, robotWeight, motors[0].getMotorProperties());
-        System.out.println(maxWheelAccel);
+        this.wheelRadius = wheelRadius;
+        System.out.println(calculateMaxFrictionAccelRad());
     }
 
     @Override
@@ -44,8 +41,7 @@ public class Mecanum extends RobotModel {
         }
         //setup target velocities
         //might be able to make these local variables depending on how this goes
-        targetWheelVelocities = powers;
-        targetVelocity = calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(powers));
+        Pose targetVelocity = calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(powers));
 
         double[] currentWheelVelocities = new double[] {
                 motors[0].getSpeed(),
@@ -55,8 +51,11 @@ public class Mecanum extends RobotModel {
         };
 
         for(int i = 0; i < 4; i++) {
-            double targetAccel = (targetWheelVelocities[i] - currentWheelVelocities[i]);
-            currentWheelVelocities[i] += Math.abs(targetAccel) > (maxWheelAccel * loopTime) ? (maxWheelAccel * Math.signum(targetAccel) * loopTime) : targetAccel;
+            double targetAccel = (powers[i] - currentWheelVelocities[i]);
+            double allowedWheelAccel = Math.abs(targetAccel) > (maxWheelAccel * loopTime) ? (maxWheelAccel * Math.signum(targetAccel) * loopTime) : targetAccel;
+            double resistiveWheelAccel = robotWeight * motors[i].getMotorProperties().backDriveTorque() * currentWheelVelocities[i] * -1.0;
+            double wheelForceOutput = allowedWheelAccel + resistiveWheelAccel;
+            currentWheelVelocities[i] += wheelForceOutput;
             motors[i].speed(currentWheelVelocities[i]);
         }
 
@@ -68,6 +67,7 @@ public class Mecanum extends RobotModel {
     private double calculateMaxWheelAccel(double wheelRadius, double robotWeight, MotorType motor) {
         //unit conversion
         double wheelRadMeters = wheelRadius * 0.0254;
+        System.out.println(wheelRadMeters);
         double robotMassKg = robotWeight / 2.205;
         double maxSpeedRad = motor.maxRPM() * ((2.0 * Math.PI) / 60.0);
         double maxTorqueNM = motor.maxTorque() * 0.113;
@@ -80,9 +80,26 @@ public class Mecanum extends RobotModel {
 
     }
 
+    private double calculateMaxFrictionAccelRad() {
+        double wheelRadMeters = wheelRadius * 0.0254;
+        double frictionCoefficient = 0.02;
+
+        return (frictionCoefficient * 9.81) / (wheelRadMeters);
+    }
+
     public Pose calculateRobotVelocity(RealMatrix wheelVelocities) {
         RealMatrix velMatrix = velocityMatrix.multiply(wheelVelocities);
         return new Pose(velMatrix.getEntry(0, 0), velMatrix.getEntry(1, 0), velMatrix.getEntry(2, 0));
+    }
+
+    public double[] calculateWheelVelocities(RealMatrix poseVelocity) {
+        RealMatrix m = wheelVelocityMatrix.multiply(poseVelocity);
+        return new double[] {
+                m.getEntry(0, 0),
+                m.getEntry(1, 0),
+                m.getEntry(2, 0),
+                m.getEntry(3, 0)
+        };
     }
 
     //TODO make this work with any motor order

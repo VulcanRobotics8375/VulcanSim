@@ -1,16 +1,19 @@
 package org.vulcanrobotics.sim;
 
 import org.vulcanrobotics.math.geometry.Pose;
+import org.vulcanrobotics.sim.motors.Motor;
 
 public abstract class RobotModel {
 
-    protected Pose robotPose = new Pose();
-    protected Pose robotPoseVelocity = new Pose();
-    protected Pose robotPoseAccel = new Pose();
+    protected volatile Pose robotPose = new Pose();
+    protected volatile Pose robotPoseVelocity = new Pose();
     protected double loopTime = 1.0 / 60.0;
 
-    public abstract void update(double... powers) throws Exception;
+    protected double wheelRadius;
+    protected double robotWeight;
+    protected Motor[] motors;
 
+    public abstract void update(double... powers) throws Exception;
 
 
     //getter and setter for robotPose
