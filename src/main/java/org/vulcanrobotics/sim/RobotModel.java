@@ -3,13 +3,8 @@ package org.vulcanrobotics.sim;
 import org.vulcanrobotics.math.geometry.Pose;
 import org.vulcanrobotics.sim.motors.Motor;
 import org.vulcanrobotics.sim.motors.MotorType;
-import org.vulcanrobotics.sim.motors.NeverestOrbital20;
 import org.vulcanrobotics.sim.motors.ZeroPowerBehavior;
 
-import java.util.PriorityQueue;
-import java.util.Queue;
-
-//TODO calculate force from motor zero power behavior
 public abstract class RobotModel {
 
     protected volatile Pose robotPose = new Pose();
@@ -46,6 +41,8 @@ public abstract class RobotModel {
             double resistiveWheelAccel = robotWeight * motorProperties.resistiveCoeff() * -1.0 * currentSpeed;
             outputSpeed = currentSpeed + targetOutputAccel + resistiveWheelAccel;
         } else {
+            //TODO calculate force from motor zero power behavior
+            //i dont think this implementation works lmfao
             double targetOutputAccel = maxWheelAccel * (motorProperties.backDriveTorque() / motorProperties.maxTorque()) * loopTime * -1.0;
             outputSpeed = currentSpeed + targetOutputAccel;
         }

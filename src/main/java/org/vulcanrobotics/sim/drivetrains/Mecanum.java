@@ -1,14 +1,10 @@
 package org.vulcanrobotics.sim.drivetrains;
 
-import org.apache.commons.math3.linear.DecompositionSolver;
-import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.vulcanrobotics.math.geometry.Pose;
-import org.vulcanrobotics.math.geometry.Vector;
 import org.vulcanrobotics.sim.RobotModel;
 import org.vulcanrobotics.sim.motors.Motor;
-import org.vulcanrobotics.sim.motors.MotorType;
 
 public class Mecanum extends RobotModel {
 
