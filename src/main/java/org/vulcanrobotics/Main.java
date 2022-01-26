@@ -2,10 +2,17 @@ package org.vulcanrobotics;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.vulcanrobotics.follower.TestFollower;
@@ -22,14 +29,16 @@ public class Main extends Application {
 
     public static ImageView robotView;
     int boardDimensions = 800;
+    int controlBoardWidth = 400;
     public static RobotModel model;
     public static Runnable followerTask;
+    private volatile boolean running = false;
 
 
     @Override
     public void start(Stage stage) throws Exception {
-
         stage.setTitle("VulcanSim dev build 0");
+
         var board = new Image(new FileInputStream("src/main/resources/img/ffField.png"));
         var boardView = new ImageView(board);
         boardView.setFitHeight(boardDimensions);
@@ -37,12 +46,40 @@ public class Main extends Application {
 
         var robot = new Image(new FileInputStream("src/main/resources/img/robot.png"));
         robotView = new ImageView(robot);
+        //TODO add scalars for this
         robotView.setFitWidth((800.0/144.0) * 12);
         robotView.setFitHeight((800.0/144.0) * 18);
 
+        Pane robotField = new Pane();
+        robotField.getChildren().add(boardView);
+        robotField.getChildren().add(robotView);
+
+        VBox controlBox = new VBox();
+        Label title = new Label("controls");
+        controlBox.getChildren().add(title);
+        Button start = new Button("start");
+        start.setOnMouseClicked(event -> {
+            running = true;
+            startRobot();
+        });
+        Button stop = new Button("stop");
+        stop.setOnMouseClicked(event -> {
+            running = false;
+        controlBox.getChildren().add(start);
+        controlBox.getChildren().add(stop);
+
+        SplitPane splitView = new SplitPane();
+
+        splitView.getItems().addAll(robotField, controlBox);
+        splitView.setDividerPosition(0, (double)boardDimensions / (boardDimensions + controlBoardWidth));
+
+        stage.setScene(new Scene(splitView, boardDimensions + controlBoardWidth, boardDimensions));
+        stage.show();
+    }
+
+    private void startRobot() {
         new Thread(() -> {
-            model.setRobotPose(new Pose(50.0, 20.0, 0.0));
-            while(true) {
+            while(running) {
                 long startTime = System.nanoTime();
                 followerTask.run();
                 model.update();
@@ -56,12 +93,6 @@ public class Main extends Application {
                 }
             }
         }).start();
-
-        Pane main = new Pane();
-        main.getChildren().add(boardView);
-        main.getChildren().add(robotView);
-        stage.setScene(new Scene(main, boardDimensions, boardDimensions));
-        stage.show();
     }
 
     private static void setRobotPosition(Pose pose) {
