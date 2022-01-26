@@ -2,26 +2,21 @@ package org.vulcanrobotics;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.apache.commons.math3.linear.MatrixUtils;
+
 import org.vulcanrobotics.follower.TestFollower;
 import org.vulcanrobotics.math.geometry.Pose;
 import org.vulcanrobotics.math.geometry.Vector;
 import org.vulcanrobotics.path.Path;
 import org.vulcanrobotics.sim.RobotModel;
-import org.vulcanrobotics.sim.drivetrains.Mecanum;
-import org.vulcanrobotics.sim.motors.NeverestOrbital20;
 
 import java.io.FileInputStream;
 import java.text.DecimalFormat;
