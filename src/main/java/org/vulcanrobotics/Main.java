@@ -73,16 +73,7 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) throws Exception {
-        NeverestOrbital20[] motors = new NeverestOrbital20[] {
-                new NeverestOrbital20(),
-                new NeverestOrbital20(),
-                new NeverestOrbital20(),
-                new NeverestOrbital20()
-        };
-        Mecanum mecanum = new Mecanum(4, 4, 1.887, 30, motors);
-//        Pose velocityOutTest = mecanum.calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(new double[] {2.0 * Math.PI, 2.0 * Math.PI, 2.0 * Math.PI, 2.0 * Math.PI}));
-//        System.out.println(velocityOutTest.toString());
-        model = mecanum;
+
         TestFollower follower = new TestFollower(new Path() {
             @Override
             public Vector error(Pose robot) {
@@ -98,7 +89,7 @@ public class Main extends Application {
             public Pose tangentVec(double t) {
                 return null;
             }
-        }, mecanum);
+        });
         followerTask = () -> {
             try {
                 follower.run();
@@ -106,6 +97,7 @@ public class Main extends Application {
                 e.printStackTrace();
             }
         };
+        model = follower.getModel();
         launch();
 
 

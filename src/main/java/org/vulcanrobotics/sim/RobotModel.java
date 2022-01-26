@@ -17,7 +17,7 @@ public abstract class RobotModel {
     //this is private now so that all the physics engine stuff cant be overwritten by a subclass
     //might be able to use singleton to instantiate this stuff
     private final Motor[] motors;
-    private final MotorType motorProperties;
+    protected final MotorType motorProperties;
     private final double maxWheelAccel;
 
     public RobotModel(double wheelRadius, double robotWeight, Motor[] motors) {
@@ -82,4 +82,9 @@ public abstract class RobotModel {
     protected void setRobotPoseVelocity(Pose velocity) {
         robotPoseVelocity = new Pose(velocity);
     }
+
+    public double getLoopTime() {
+        return loopTime;
+    }
+
 }

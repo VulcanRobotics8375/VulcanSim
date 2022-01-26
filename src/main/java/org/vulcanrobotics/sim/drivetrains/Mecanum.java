@@ -29,6 +29,12 @@ public class Mecanum extends RobotModel {
 
         //give motors their target velocity, let motor physics API do the rest?
         //maybe let RobotModel handle physics. Motor objects should just be for motor intrinsics
+        for (int i = 0; i < 4; i++) {
+            setTargetSpeed(i, powers[i]);
+        }
+
+        Pose velocityUpdate = calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(getWheelVelocities()).scalarMultiply(loopTime * (motorProperties.maxRPM()) * (2.0 * Math.PI / 60.0)));
+        setRobotPose(robotPose.plus(velocityUpdate));
 
     }
 
