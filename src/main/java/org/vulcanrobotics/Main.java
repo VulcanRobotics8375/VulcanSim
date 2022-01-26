@@ -65,8 +65,9 @@ public class Main extends Application {
         Button stop = new Button("stop");
         stop.setOnMouseClicked(event -> {
             running = false;
-        controlBox.getChildren().add(start);
-        controlBox.getChildren().add(stop);
+        });
+            controlBox.getChildren().add(start);
+            controlBox.getChildren().add(stop);
 
         SplitPane splitView = new SplitPane();
 
