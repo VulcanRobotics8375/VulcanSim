@@ -39,7 +39,7 @@ public class TestFollower extends Follower{
 
         double[] outputWheelVelocities = model.calculateWheelVelocities(MatrixUtils.createColumnRealMatrix(new double[] {velocityOut.x, velocityOut.y, velocityOut.heading}));
 
-        model.update(outputWheelVelocities);
+
     }
 
 }
