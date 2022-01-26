@@ -88,6 +88,9 @@ public abstract class RobotModel {
     protected void setRobotPoseVelocity(Pose velocity) {
         robotPoseVelocity = new Pose(velocity);
     }
+    public Pose getRobotPoseVelocity() {
+        return robotPoseVelocity;
+    }
 
     public double getLoopTime() {
         return loopTime;

@@ -30,6 +30,7 @@ public class Mecanum extends RobotModel {
 
         Pose velocityUpdate = calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(getWheelVelocities()).scalarMultiply(loopTime * (motorProperties.maxRPM()) * (2.0 * Math.PI / 60.0)));
         setRobotPose(robotPose.plus(velocityUpdate));
+        setRobotPoseVelocity(velocityUpdate);
     }
 
     public Pose calculateRobotVelocity(RealMatrix wheelVelocities) {
