@@ -24,6 +24,7 @@ import org.vulcanrobotics.sim.drivetrains.Mecanum;
 import org.vulcanrobotics.sim.motors.NeverestOrbital20;
 
 import java.io.FileInputStream;
+import java.text.DecimalFormat;
 
 public class Main extends Application {
 
@@ -33,6 +34,9 @@ public class Main extends Application {
     public static RobotModel model;
     public static Runnable followerTask;
     private volatile boolean running = false;
+    private Pose poseVelocity;
+    private final Label poseVelocityLabel = new Label();
+    double robotWidth = 12, robotLength = 16;
 
 
     @Override
@@ -47,8 +51,9 @@ public class Main extends Application {
         var robot = new Image(new FileInputStream("src/main/resources/img/robot.png"));
         robotView = new ImageView(robot);
         //TODO add scalars for this
-        robotView.setFitWidth((800.0/144.0) * 12);
-        robotView.setFitHeight((800.0/144.0) * 18);
+        robotView.setFitWidth((800.0/144.0) * robotWidth);
+        robotView.setFitHeight((800.0/144.0) * robotLength);
+        setRobotPosition(new Pose(0, 0, 0));
 
         Pane robotField = new Pane();
         robotField.getChildren().add(boardView);
@@ -68,6 +73,7 @@ public class Main extends Application {
         });
             controlBox.getChildren().add(start);
             controlBox.getChildren().add(stop);
+            controlBox.getChildren().add(poseVelocityLabel);
 
         SplitPane splitView = new SplitPane();
 
@@ -88,6 +94,9 @@ public class Main extends Application {
                 try {
                     long elapsedTimeNS = System.nanoTime() - startTime;
                     long timeLeft = ((long)(model.getLoopTime() * 1000)) - (elapsedTimeNS / 1000000);
+                    poseVelocity = model.getRobotPoseVelocity();
+                    DecimalFormat df = new DecimalFormat("0.00");
+                    Platform.runLater(() -> poseVelocityLabel.setText("pose velocity: " + df.format(poseVelocity.x / model.getLoopTime()) + ", " + df.format(poseVelocity.y / model.getLoopTime()) + ", " + df.format(poseVelocity.heading / model.getLoopTime())));
                     Thread.sleep(timeLeft);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -98,9 +107,9 @@ public class Main extends Application {
 
     private static void setRobotPosition(Pose pose) {
         robotView.toFront();
-        robotView.setY((pose.y) * (800.0 / 144.0));
-        robotView.setX((pose.x) * (800.0 / 144.0));
-        robotView.setRotate(-Math.toDegrees(pose.heading));
+        robotView.setY(((-pose.y) * (800.0 / 144.0)) + 400.0 - (robotView.getFitHeight() / 2.0));
+        robotView.setX(((pose.x) * (800.0 / 144.0) + 400 - (robotView.getFitWidth() / 2.0)));
+        robotView.setRotate(-Math.toDegrees(pose.heading) + 90);
     }
 
     private Pose robotPositionToPixelPosition(Pose robotPose) {
