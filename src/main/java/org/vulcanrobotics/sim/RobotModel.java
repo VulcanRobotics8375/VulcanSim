@@ -14,8 +14,6 @@ public abstract class RobotModel {
     protected double wheelRadius;
     protected double robotWeight;
 
-    //this is private now so that all the physics engine stuff cant be overwritten by a subclass
-    //might be able to use singleton to instantiate this stuff
     private final Motor[] motors;
     protected final MotorType motorProperties;
     private final double maxWheelAccel;
@@ -29,7 +27,7 @@ public abstract class RobotModel {
 
     }
 
-    public abstract void update(double... powers) throws Exception;
+    public abstract void update();
 
     //this is where the physics stuff comes in (resistive forces, maximum acceleration, etc)
     protected void setTargetSpeed(int motorId, double targetSpeed) {
@@ -67,6 +65,14 @@ public abstract class RobotModel {
         double[] motorPowers = new double[motors.length];
         for (int i = 0; i < motorPowers.length; i++) {
             motorPowers[i] = motors[i].getSpeed();
+        }
+        return motorPowers;
+    }
+
+    protected double[] getMotorPowers() {
+        double[] motorPowers = new double[motors.length];
+        for (int i = 0; i < motorPowers.length; i++) {
+            motorPowers[i] = motors[i].getPower();
         }
         return motorPowers;
     }

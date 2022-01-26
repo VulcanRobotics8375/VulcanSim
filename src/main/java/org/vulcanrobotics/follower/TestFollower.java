@@ -38,7 +38,15 @@ public class TestFollower extends Follower{
         Pose velocityOut = new Pose(Math.cos(angleToPoint), Math.sin(angleToPoint), 0.0);
 
         double[] outputWheelVelocities = model.calculateWheelVelocities(MatrixUtils.createColumnRealMatrix(new double[] {velocityOut.x, velocityOut.y, velocityOut.heading}));
+        setPowers(outputWheelVelocities);
 
+    }
+
+    void setPowers(double[] powers) {
+        fl.setPower(powers[0]);
+        fr.setPower(powers[1]);
+        bl.setPower(powers[2]);
+        br.setPower(powers[3]);
 
     }
 

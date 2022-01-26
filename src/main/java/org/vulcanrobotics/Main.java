@@ -45,6 +45,7 @@ public class Main extends Application {
             while(true) {
                 long startTime = System.nanoTime();
                 followerTask.run();
+                model.update();
                 Platform.runLater(() -> setRobotPosition(model.getRobotPose()));
                 try {
                     long elapsedTimeNS = System.nanoTime() - startTime;

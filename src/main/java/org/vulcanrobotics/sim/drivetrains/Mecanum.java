@@ -22,20 +22,14 @@ public class Mecanum extends RobotModel {
     }
 
     @Override
-    public void update(double... powers) throws Exception {
-        if(powers.length != 4) {
-            throw new Exception("mecanum requires 4 motor powers");
-        }
-
-        //give motors their target velocity, let motor physics API do the rest?
-        //maybe let RobotModel handle physics. Motor objects should just be for motor intrinsics
+    public void update() {
+        double[] powers = getMotorPowers();
         for (int i = 0; i < 4; i++) {
             setTargetSpeed(i, powers[i]);
         }
 
         Pose velocityUpdate = calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(getWheelVelocities()).scalarMultiply(loopTime * (motorProperties.maxRPM()) * (2.0 * Math.PI / 60.0)));
         setRobotPose(robotPose.plus(velocityUpdate));
-
     }
 
     public Pose calculateRobotVelocity(RealMatrix wheelVelocities) {
