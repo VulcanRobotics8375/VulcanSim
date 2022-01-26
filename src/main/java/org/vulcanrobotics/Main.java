@@ -43,10 +43,13 @@ public class Main extends Application {
         new Thread(() -> {
             model.setRobotPose(new Pose(50.0, 20.0, 0.0));
             while(true) {
+                long startTime = System.nanoTime();
                 followerTask.run();
                 Platform.runLater(() -> setRobotPosition(model.getRobotPose()));
                 try {
-                    Thread.sleep(16);
+                    long elapsedTimeNS = System.nanoTime() - startTime;
+                    long timeLeft = ((long)(model.getLoopTime() * 1000)) - (elapsedTimeNS / 1000000);
+                    Thread.sleep(timeLeft);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
