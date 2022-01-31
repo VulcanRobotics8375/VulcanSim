@@ -8,6 +8,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.apache.commons.math3.linear.MatrixUtils;
+import org.vulcanrobotics.follower.ContinuousLookAhead;
 import org.vulcanrobotics.follower.TestFollower;
 import org.vulcanrobotics.math.geometry.Pose;
 import org.vulcanrobotics.math.geometry.Vector;
@@ -41,7 +42,7 @@ public class Main extends Application {
         robotView.setFitHeight((800.0/144.0) * 18);
 
         new Thread(() -> {
-            model.setRobotPose(new Pose(50.0, 20.0, 0.0));
+            model.setRobotPose(new Pose(0.0, 0.0, 0.0));
             while(true) {
                 followerTask.run();
                 Platform.runLater(() -> setRobotPosition(model.getRobotPose()));
@@ -83,7 +84,7 @@ public class Main extends Application {
 //        Pose velocityOutTest = mecanum.calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(new double[] {2.0 * Math.PI, 2.0 * Math.PI, 2.0 * Math.PI, 2.0 * Math.PI}));
 //        System.out.println(velocityOutTest.toString());
         model = mecanum;
-        TestFollower follower = new TestFollower(new Path() {
+        ContinuousLookAhead follower = new ContinuousLookAhead(new Path() {
             @Override
             public Vector error(Pose robot) {
                return null;

@@ -31,7 +31,7 @@ public class Mecanum extends RobotModel {
         this.robotWeight = robotWeight;
         maxWheelAccel = calculateMaxWheelAccel(wheelRadius, robotWeight, motors[0].getMotorProperties());
         this.wheelRadius = wheelRadius;
-        System.out.println(calculateMaxFrictionAccelRad());
+//        System.out.println(calculateMaxFrictionAccelRad());
     }
 
     @Override
@@ -61,13 +61,13 @@ public class Mecanum extends RobotModel {
 
         Pose velocityUpdate = calculateRobotVelocity(MatrixUtils.createColumnRealMatrix(currentWheelVelocities).scalarMultiply(loopTime * (motors[0].getMotorProperties().maxRPM()) * (2.0 * Math.PI / 60.0)));
         setRobotPose(robotPose.plus(velocityUpdate));
-        System.out.println(velocityUpdate);
+//        System.out.println(velocityUpdate);
     }
 
     private double calculateMaxWheelAccel(double wheelRadius, double robotWeight, MotorType motor) {
         //unit conversion
         double wheelRadMeters = wheelRadius * 0.0254;
-        System.out.println(wheelRadMeters);
+//        System.out.println(wheelRadMeters);
         double robotMassKg = robotWeight / 2.205;
         double maxSpeedRad = motor.maxRPM() * ((2.0 * Math.PI) / 60.0);
         double maxTorqueNM = motor.maxTorque() * 0.113;
