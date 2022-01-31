@@ -8,7 +8,7 @@ public class Derivative implements UnivariateFunction {
 
     public Derivative(UnivariateFunction function) {
         this.function = function;
-        this.h = 0.00001;
+        this.h = 0.0000000001;
     }
 
     public Derivative(UnivariateFunction function, double h) {

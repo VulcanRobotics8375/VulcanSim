@@ -7,19 +7,19 @@ import org.apache.commons.math3.util.FastMath;
 public class ArcLength implements UnivariateFunction {
     Derivative derivative;
     Integrand integrand;
-    SimpsonIntegrator integrator;
+    SimpsonIntegrator homer;
     double startX;
 
     public ArcLength(UnivariateFunction function) {
         this.derivative = new Derivative(function);
         this.integrand = new Integrand();
-        this.integrator = new SimpsonIntegrator();
+        this.homer = new SimpsonIntegrator();
     }
 
     @Override
     public double value(double endX) {
 //        int intervals = (int) (FastMath.abs(endX - startX) / 0.5);
-        return integrator.integrate(50000, integrand, startX, endX);
+        return homer.integrate(10000000, integrand, startX, endX);
     }
 
     public class Integrand implements UnivariateFunction {

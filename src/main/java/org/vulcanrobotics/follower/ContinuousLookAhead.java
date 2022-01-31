@@ -1,7 +1,6 @@
 package org.vulcanrobotics.follower;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.solvers.BisectionSolver;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.optim.MaxEval;
@@ -20,14 +19,14 @@ import org.vulcanrobotics.sim.drivetrains.Mecanum;
 public class ContinuousLookAhead extends Follower{
     Mecanum model;
 
-    final double lookAhead = 100;
+    final double lookAhead = 10;
 
     UnivariateFunction function = new Function();
     Distance distance = new Distance(function);
     ArcLength arcLength = new ArcLength(function);
     ArcLengthZero arcLengthZero = new ArcLengthZero();
 
-    BrentOptimizer optim = new BrentOptimizer(0.01, 0.01);
+    BrentOptimizer optim = new BrentOptimizer(1e-10, 1e-14);
     BisectionSolver solver = new BisectionSolver();
 
     public ContinuousLookAhead(Path path, Mecanum model) {
@@ -44,18 +43,21 @@ public class ContinuousLookAhead extends Follower{
         try {
             UnivariatePointValuePair min = optim.optimize(new MaxEval(1000), new UnivariateObjectiveFunction(distance), GoalType.MINIMIZE, new SearchInterval(-1000, 1000));
 //            System.out.println("(" + min.getPoint() + ", " + min.getValue() + ")");
-            arcLength.updateStartX(min.getValue());
+            arcLength.updateStartX(min.getPoint());
 
-            targetX = solver.solve(100, arcLengthZero, min.getValue() + 1, min.getValue() + 1000);
+            targetX = solver.solve(100, arcLengthZero, min.getPoint() + 1, min.getPoint() + 1000);
             targetY = function.value(targetX);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         Pose targetPose = new Pose(targetX, targetY, 0.0);
-        System.out.println(targetPose);
         double angleToPoint = Math.atan2(targetPose.y - robotPose.y, targetPose.x - robotPose.x);
         Pose velocityOut = new Pose(Math.cos(angleToPoint), Math.sin(angleToPoint), 0.0);
+
+//        System.out.println("Target: " + String.format("%.2f", targetPose.x) + ", " + String.format("%.2f", targetPose.y));
+//        System.out.println("Current: " + String.format("%.2f", robotPose.x) + ", " + String.format("%.2f", robotPose.y));
+//        System.out.println("Velocity: " + String.format("%.2f", velocityOut.x) + ", " + String.format("%.2f", velocityOut.y));
 
         double[] outputWheelVelocities = model.calculateWheelVelocities(MatrixUtils.createColumnRealMatrix(new double[]{velocityOut.x, velocityOut.y, velocityOut.heading}));
 
@@ -65,7 +67,7 @@ public class ContinuousLookAhead extends Follower{
     private static class Function implements UnivariateFunction {
         @Override
         public double value(double x) {
-            return FastMath.pow(x/10, 2);
+            return FastMath.pow(x / 10, 2);
         }
     }
     private class ArcLengthZero implements UnivariateFunction {
