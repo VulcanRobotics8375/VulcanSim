@@ -10,6 +10,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import org.vulcanrobotics.follower.ContinuousLookAhead;
 import org.vulcanrobotics.follower.Follower;
 import org.vulcanrobotics.follower.TestFollower;
 import org.vulcanrobotics.math.geometry.Pose;
@@ -121,7 +122,7 @@ public class App extends Application {
         List<Pose> pathPoints = new ArrayList<>();
         pathPoints.add(new Pose(60.0, -40.0, 0.0));
         BasicPath path = new BasicPath(pathPoints);
-        follower = new TestFollower(path);
+        follower = new ContinuousLookAhead(path);
 
         launch();
 
