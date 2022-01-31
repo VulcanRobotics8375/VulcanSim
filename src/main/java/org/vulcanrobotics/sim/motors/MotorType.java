@@ -15,5 +15,6 @@ public @interface MotorType {
     double maxRPM();
     double maxTorque();
     double backDriveTorque();
+    double resistiveCoeff();
 
 }
