@@ -23,6 +23,8 @@ public abstract class Path {
      * but we still want our Follower to be able to follow any extension of the Path object.
      */
 
-    public abstract Pose tangentVec(double t);
+    public Pose tangentVec(double t) {
+        return null;
+    }
 
 }

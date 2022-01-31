@@ -1,14 +1,19 @@
 package org.vulcanrobotics.follower;
 
 import org.apache.commons.math3.linear.MatrixUtils;
+import org.vulcanrobotics.App;
 import org.vulcanrobotics.math.geometry.Pose;
 import org.vulcanrobotics.math.utils.Angle;
+import org.vulcanrobotics.path.BasicPath;
 import org.vulcanrobotics.path.Path;
 import org.vulcanrobotics.sim.RobotModel;
 import org.vulcanrobotics.sim.drivetrains.Mecanum;
 import org.vulcanrobotics.sim.motors.Motor;
 import org.vulcanrobotics.sim.motors.NeverestOrbital20;
 import org.vulcanrobotics.sim.motors.ZeroPowerBehavior;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestFollower extends Follower{
 
@@ -31,10 +36,11 @@ public class TestFollower extends Follower{
         setModel(model);
     }
 
+    @Override
     public void run() {
         Pose robotPose = model.getRobotPose();
 
-        Pose targetPose = new Pose(0.0, 30, 0);
+        Pose targetPose = new Pose(60.0,-40.0, 0);
         double angleToPoint = Math.atan2(targetPose.y - robotPose.y, targetPose.x - robotPose.x);
         Pose velocityOut = new Pose(Math.cos(angleToPoint), Math.sin(angleToPoint), Angle.diff(robotPose.heading, targetPose.heading));
 

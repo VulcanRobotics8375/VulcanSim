@@ -5,9 +5,13 @@ import org.vulcanrobotics.sim.RobotModel;
 
 public abstract class Follower {
     protected RobotModel model;
+    protected Path path;
 
     public Follower(Path path) {
+        this.path = path;
     }
+
+    public abstract void run();
 
     protected void setModel(RobotModel model) {
         this.model = model;

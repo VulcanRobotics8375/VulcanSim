@@ -13,4 +13,6 @@ module org.vulcanrobotics {
     exports org.vulcanrobotics.sim;
     exports org.vulcanrobotics.sim.motors;
     exports org.vulcanrobotics.math.geometry;
+    exports org.vulcanrobotics.follower;
+    exports org.vulcanrobotics.path;
 }

@@ -22,7 +22,6 @@ public class BasicPath extends Path {
      * since the derivative of linear paths usually aren't continuous, we use a bounding box
      * algorithm to find which two points the robot is between, and then use simple vector operations
      * to find the cross track error between those two points.
-     *
      */
     @Override
     public Vector error(Pose robot) {
@@ -72,12 +71,6 @@ public class BasicPath extends Path {
         }
 
         return null;
-
-    }
-
-    @Override
-    public Pose tangentVec(double t) {
-        return null;
     }
 
     // the length of a linear path is just the pythagorean distance between each segment added together
@@ -100,6 +93,10 @@ public class BasicPath extends Path {
         }
 
         return segmentLengths;
+    }
+
+    public List<Pose> getPoints() {
+        return points;
     }
 
 }

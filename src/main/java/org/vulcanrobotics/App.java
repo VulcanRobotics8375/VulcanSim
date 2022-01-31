@@ -3,35 +3,35 @@ package org.vulcanrobotics;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.SplitPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import org.vulcanrobotics.follower.Follower;
 import org.vulcanrobotics.follower.TestFollower;
 import org.vulcanrobotics.math.geometry.Pose;
-import org.vulcanrobotics.math.geometry.Vector;
-import org.vulcanrobotics.path.Path;
+import org.vulcanrobotics.path.BasicPath;
 import org.vulcanrobotics.sim.RobotModel;
 
 import java.io.FileInputStream;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Main extends Application {
+public class App extends Application {
 
     public static ImageView robotView;
     int boardDimensions = 800;
     int controlBoardWidth = 400;
-    public static RobotModel model;
-    public static Runnable followerTask;
     private volatile boolean running = false;
     private Pose poseVelocity;
     private final Label poseVelocityLabel = new Label();
     double robotWidth = 12, robotLength = 16;
+    double elapsedTime = 0;
+    public static Follower follower;
 
 
     @Override
@@ -45,9 +45,9 @@ public class Main extends Application {
 
         var robot = new Image(new FileInputStream("src/main/resources/img/robot.png"));
         robotView = new ImageView(robot);
-        //TODO add scalars for this
         robotView.setFitWidth((800.0/144.0) * robotWidth);
         robotView.setFitHeight((800.0/144.0) * robotLength);
+        //set robot position to default
         setRobotPosition(new Pose(0, 0, 0));
 
         Pane robotField = new Pane();
@@ -66,13 +66,17 @@ public class Main extends Application {
         stop.setOnMouseClicked(event -> {
             running = false;
         });
-            controlBox.getChildren().add(start);
-            controlBox.getChildren().add(stop);
-            controlBox.getChildren().add(poseVelocityLabel);
+        controlBox.getChildren().add(start);
+        controlBox.getChildren().add(stop);
+        controlBox.getChildren().add(poseVelocityLabel);
+
+        TabPane tabs = new TabPane();
+        tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        tabs.getTabs().add(new Tab("controls", controlBox));
 
         SplitPane splitView = new SplitPane();
 
-        splitView.getItems().addAll(robotField, controlBox);
+        splitView.getItems().addAll(robotField, tabs);
         splitView.setDividerPosition(0, (double)boardDimensions / (boardDimensions + controlBoardWidth));
 
         stage.setScene(new Scene(splitView, boardDimensions + controlBoardWidth, boardDimensions));
@@ -81,9 +85,10 @@ public class Main extends Application {
 
     private void startRobot() {
         new Thread(() -> {
+            RobotModel model = follower.getModel();
             while(running) {
                 long startTime = System.nanoTime();
-                followerTask.run();
+                follower.run();
                 model.update();
                 Platform.runLater(() -> setRobotPosition(model.getRobotPose()));
                 try {
@@ -113,31 +118,11 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) throws Exception {
+        List<Pose> pathPoints = new ArrayList<>();
+        pathPoints.add(new Pose(60.0, -40.0, 0.0));
+        BasicPath path = new BasicPath(pathPoints);
+        follower = new TestFollower(path);
 
-        TestFollower follower = new TestFollower(new Path() {
-            @Override
-            public Vector error(Pose robot) {
-               return null;
-            }
-
-            @Override
-            public Pose get(double t) {
-                return null;
-            }
-
-            @Override
-            public Pose tangentVec(double t) {
-                return null;
-            }
-        });
-        followerTask = () -> {
-            try {
-                follower.run();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        };
-        model = follower.getModel();
         launch();
 
 
