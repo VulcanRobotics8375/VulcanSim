@@ -68,7 +68,7 @@ public class GuidingVectorField extends Follower {
         Pose robotPose = model.getRobotPose();
 
         distance.updatePos(robotPose.vector());
-        UnivariatePointValuePair minValue = optim.optimize(new MaxEval(1000), new UnivariateObjectiveFunction(distance), GoalType.MINIMIZE, new SearchInterval(0, 48));
+        UnivariatePointValuePair minValue = optim.optimize(new MaxEval(1000), new UnivariateObjectiveFunction(distance), GoalType.MINIMIZE, new SearchInterval(0, spline.getKnots()[spline.getN()]));
         double derivative = spline.derivative().value(minValue.getPoint());
         double derivativeHeading = FastMath.atan2(derivative, 1);
         Vector tangentVec = new Vector(FastMath.cos(derivativeHeading), FastMath.sin(derivativeHeading)).multiply(TANGENT_VECTOR_GAIN);
