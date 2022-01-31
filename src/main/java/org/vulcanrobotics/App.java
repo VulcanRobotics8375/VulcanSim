@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 
 import org.vulcanrobotics.follower.ContinuousLookAhead;
 import org.vulcanrobotics.follower.Follower;
+import org.vulcanrobotics.follower.GuidingVectorField;
 import org.vulcanrobotics.follower.TestFollower;
 import org.vulcanrobotics.math.geometry.Pose;
 import org.vulcanrobotics.path.BasicPath;
@@ -60,8 +61,10 @@ public class App extends Application {
         controlBox.getChildren().add(title);
         Button start = new Button("start");
         start.setOnMouseClicked(event -> {
-            running = true;
-            startRobot();
+            if(!running) {
+                running = true;
+                startRobot();
+            }
         });
         Button stop = new Button("stop");
         stop.setOnMouseClicked(event -> {
@@ -87,6 +90,11 @@ public class App extends Application {
     private void startRobot() {
         new Thread(() -> {
             RobotModel model = follower.getModel();
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             while(running) {
                 long startTime = System.nanoTime();
                 follower.run();
@@ -98,7 +106,9 @@ public class App extends Application {
                     poseVelocity = model.getRobotPoseVelocity();
                     DecimalFormat df = new DecimalFormat("0.00");
                     Platform.runLater(() -> poseVelocityLabel.setText("pose velocity: " + df.format(poseVelocity.x / model.getLoopTime()) + ", " + df.format(poseVelocity.y / model.getLoopTime()) + ", " + df.format(poseVelocity.heading / model.getLoopTime())));
-                    Thread.sleep(timeLeft);
+                    if(timeLeft > 0) {
+                        Thread.sleep(timeLeft);
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -119,10 +129,13 @@ public class App extends Application {
     }
 
     public static void main(String[] args) throws Exception {
-        List<Pose> pathPoints = new ArrayList<>();
-        pathPoints.add(new Pose(60.0, -40.0, 0.0));
+        ArrayList<Pose> pathPoints = new ArrayList<>();
+        pathPoints.add(new Pose(0.0, 0.0, 0.0));
+        pathPoints.add(new Pose(16.0, 12.0, 0.0));
+        pathPoints.add(new Pose(48.0, -5.0, 0.0));
+
         BasicPath path = new BasicPath(pathPoints);
-        follower = new ContinuousLookAhead(path);
+        follower = new GuidingVectorField(path, pathPoints);
 
         launch();
 
