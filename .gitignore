@@ -109,3 +109,4 @@ build/tmp/
 
 # MacOS stuff
 .DS_Store
+*.bin
