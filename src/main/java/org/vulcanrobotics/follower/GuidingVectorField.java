@@ -1,7 +1,10 @@
 package org.vulcanrobotics.follower;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.analysis.solvers.BisectionSolver;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -10,9 +13,12 @@ import org.apache.commons.math3.optim.univariate.SearchInterval;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.util.FastMath;
+import org.vulcanrobotics.App;
+import org.vulcanrobotics.math.geometry.ArcLength;
 import org.vulcanrobotics.math.geometry.Distance;
 import org.vulcanrobotics.math.geometry.Pose;
 import org.vulcanrobotics.math.geometry.Vector;
+import org.vulcanrobotics.math.utils.Angle;
 import org.vulcanrobotics.path.Path;
 import org.vulcanrobotics.sim.drivetrains.Mecanum;
 import org.vulcanrobotics.sim.motors.Motor;
@@ -34,11 +40,16 @@ public class GuidingVectorField extends Follower {
     ArrayList<Pose> guidePoints;
 
     BrentOptimizer optim = new BrentOptimizer(1e-10, 1e-14);
+    BisectionSolver solver = new BisectionSolver();
     Distance distance;
+    SplineArcLength splineArcLength;
+    double robotDistanceTravelled;
+
 
     public GuidingVectorField(Path path, ArrayList<Pose> guidePoints) {
         super(path);
         this.guidePoints = guidePoints;
+
 
         // initialize motors and robot model
         fl = new NeverestOrbital20();
@@ -61,22 +72,35 @@ public class GuidingVectorField extends Follower {
         }
         spline = interpolator.interpolate(x, y);
         distance = new Distance(spline);
+        splineArcLength = new SplineArcLength(spline);
+        robotDistanceTravelled = 0.5;
+        App.drawFunction(spline, 0, spline.getKnots()[spline.getN()]);
     }
 
     @Override
     public void run() {
         Pose robotPose = model.getRobotPose();
 
+        //robot arc length calculation
+        Pose robotVelocity = model.getRobotPoseVelocity();
+        robotDistanceTravelled += Math.sqrt((robotVelocity.x * robotVelocity.x) + (robotVelocity.y * robotVelocity.y));
+
         distance.updatePos(robotPose.vector());
-        UnivariatePointValuePair minValue = optim.optimize(new MaxEval(1000), new UnivariateObjectiveFunction(distance), GoalType.MINIMIZE, new SearchInterval(0, spline.getKnots()[spline.getN()]));
+        double currentX = solver.solve(100, x -> splineArcLength.value(x) - robotDistanceTravelled, 0.1, spline.getKnots()[spline.getN()]);
+        UnivariatePointValuePair minValue = optim.optimize(new MaxEval(1000), new UnivariateObjectiveFunction(distance), GoalType.MINIMIZE, new SearchInterval(currentX, spline.getKnots()[spline.getN()]));
+
         double derivative = spline.derivative().value(minValue.getPoint());
         double derivativeHeading = FastMath.atan2(derivative, 1);
         Vector tangentVec = new Vector(FastMath.cos(derivativeHeading), FastMath.sin(derivativeHeading)).multiply(TANGENT_VECTOR_GAIN);
         Vector crossTrackVec = new Vector(minValue.getPoint() - robotPose.x, spline.value(minValue.getPoint()) - robotPose.y).multiply(CROSS_TRACK_ERROR_GAIN);
 
         Vector resultant = tangentVec.plus(crossTrackVec);
-        System.out.println(crossTrackVec.magnitude());
-        double[] outputWheelVelocities = model.calculateWheelVelocities(MatrixUtils.createColumnRealMatrix(new double[]{resultant.x, resultant.y, 0.0}));
+        double vectorAngle = tangentVec.angle();
+        double turnOutput = Angle.diff(robotPose.heading, vectorAngle) * 0.4;
+        double translationalVectorScalar = 1.0 - (2.0 * Math.abs(turnOutput));
+        resultant = resultant.multiply(translationalVectorScalar);
+
+        double[] outputWheelVelocities = model.calculateWheelVelocities(MatrixUtils.createColumnRealMatrix(new double[]{resultant.x, resultant.y, turnOutput}));
         setPowers(outputWheelVelocities);
     }
 
@@ -86,5 +110,35 @@ public class GuidingVectorField extends Follower {
         bl.setPower(powers[2]);
         br.setPower(powers[3]);
 
+    }
+}
+
+class ArcLengthIntegrand implements UnivariateFunction {
+
+    PolynomialSplineFunction spline;
+
+    public ArcLengthIntegrand(PolynomialSplineFunction spline) {
+     this.spline = spline;
+    }
+
+    @Override
+    public double value(double x) {
+        return FastMath.sqrt(1 + FastMath.pow(spline.polynomialSplineDerivative().value(x), 2));
+    }
+}
+
+class SplineArcLength implements UnivariateFunction {
+
+    PolynomialSplineFunction spline;
+    SimpsonIntegrator integrator;
+
+    public SplineArcLength(PolynomialSplineFunction spline) {
+        this.spline = spline;
+        integrator = new SimpsonIntegrator();
+    }
+
+    @Override
+    public double value(double x) {
+        return integrator.integrate(100000, new ArcLengthIntegrand(spline), 0, x);
     }
 }
