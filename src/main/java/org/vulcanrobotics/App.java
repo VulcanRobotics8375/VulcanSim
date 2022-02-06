@@ -174,7 +174,7 @@ public class App extends Application {
 
 
         BasicPath path = new BasicPath(pathPoints);
-        follower = new GuidingVectorField(path, pathPoints);
+        follower = new ContinuousLookAhead(path, pathPoints);
 
         launch();
 

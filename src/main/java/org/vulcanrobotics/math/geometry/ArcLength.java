@@ -2,23 +2,24 @@ package org.vulcanrobotics.math.geometry;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.util.FastMath;
 
 public class ArcLength implements UnivariateFunction {
-    Derivative derivative;
+    PolynomialSplineFunction derivative;
     Integrand integrand;
     SimpsonIntegrator homer;
     double startX;
 
-    public ArcLength(UnivariateFunction function) {
-        this.derivative = new Derivative(function);
+    public ArcLength(PolynomialSplineFunction function) {
+        this.derivative = function.polynomialSplineDerivative();
         this.integrand = new Integrand();
         this.homer = new SimpsonIntegrator();
+        this.startX = 0;
     }
 
     @Override
     public double value(double endX) {
-//        int intervals = (int) (FastMath.abs(endX - startX) / 0.5);
         return homer.integrate(10000000, integrand, startX, endX);
     }
 

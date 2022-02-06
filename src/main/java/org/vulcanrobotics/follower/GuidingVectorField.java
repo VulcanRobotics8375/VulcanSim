@@ -42,7 +42,7 @@ public class GuidingVectorField extends Follower {
     BrentOptimizer optim = new BrentOptimizer(1e-10, 1e-14);
     BisectionSolver solver = new BisectionSolver();
     Distance distance;
-    SplineArcLength splineArcLength;
+    ArcLength arcLength;
     double robotDistanceTravelled;
 
 
@@ -72,7 +72,7 @@ public class GuidingVectorField extends Follower {
         }
         spline = interpolator.interpolate(x, y);
         distance = new Distance(spline);
-        splineArcLength = new SplineArcLength(spline);
+        arcLength = new ArcLength(spline);
         robotDistanceTravelled = 0.5;
         App.drawFunction(spline, 0, spline.getKnots()[spline.getN()]);
     }
@@ -86,7 +86,7 @@ public class GuidingVectorField extends Follower {
         robotDistanceTravelled += Math.sqrt((robotVelocity.x * robotVelocity.x) + (robotVelocity.y * robotVelocity.y));
 
         distance.updatePos(robotPose.vector());
-        double currentX = solver.solve(100, x -> splineArcLength.value(x) - robotDistanceTravelled, 0.1, spline.getKnots()[spline.getN()]);
+        double currentX = solver.solve(100, x -> arcLength.value(x) - robotDistanceTravelled, 0.1, spline.getKnots()[spline.getN()]);
         UnivariatePointValuePair minValue = optim.optimize(new MaxEval(1000), new UnivariateObjectiveFunction(distance), GoalType.MINIMIZE, new SearchInterval(currentX, spline.getKnots()[spline.getN()]));
 
         double derivative = spline.derivative().value(minValue.getPoint());
@@ -110,35 +110,5 @@ public class GuidingVectorField extends Follower {
         bl.setPower(powers[2]);
         br.setPower(powers[3]);
 
-    }
-}
-
-class ArcLengthIntegrand implements UnivariateFunction {
-
-    PolynomialSplineFunction spline;
-
-    public ArcLengthIntegrand(PolynomialSplineFunction spline) {
-     this.spline = spline;
-    }
-
-    @Override
-    public double value(double x) {
-        return FastMath.sqrt(1 + FastMath.pow(spline.polynomialSplineDerivative().value(x), 2));
-    }
-}
-
-class SplineArcLength implements UnivariateFunction {
-
-    PolynomialSplineFunction spline;
-    SimpsonIntegrator integrator;
-
-    public SplineArcLength(PolynomialSplineFunction spline) {
-        this.spline = spline;
-        integrator = new SimpsonIntegrator();
-    }
-
-    @Override
-    public double value(double x) {
-        return integrator.integrate(100000, new ArcLengthIntegrand(spline), 0, x);
     }
 }
