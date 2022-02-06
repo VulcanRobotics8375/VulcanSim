@@ -92,9 +92,8 @@ public class ContinuousLookAhead extends Follower{
             e.printStackTrace();
         }
 
-        Pose targetPose = new Pose(targetX, targetY, 0.0);
-        double angleToPoint = Math.atan2(targetPose.y - robotPose.y, targetPose.x - robotPose.x);
-        double turnOutput = headingPID.run(angleToPoint, robotPose.heading);
+        double angleToPoint = Math.atan2(targetY - robotPose.y, targetX - robotPose.x);
+        double turnOutput = headingPID.run(Angle.diff(robotPose.heading, angleToPoint));
         Pose velocityOut = new Pose(FastMath.cos(angleToPoint), FastMath.sin(angleToPoint), turnOutput);
 
         double[] outputWheelVelocities = model.calculateWheelVelocities(MatrixUtils.createColumnRealMatrix(new double[]{velocityOut.x, velocityOut.y, velocityOut.heading}));

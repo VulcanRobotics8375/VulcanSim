@@ -14,6 +14,7 @@ import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 import org.apache.commons.math3.util.FastMath;
 import org.vulcanrobotics.App;
+import org.vulcanrobotics.math.control.PID;
 import org.vulcanrobotics.math.geometry.ArcLength;
 import org.vulcanrobotics.math.geometry.Distance;
 import org.vulcanrobotics.math.geometry.Pose;
@@ -45,6 +46,7 @@ public class GuidingVectorField extends Follower {
     ArcLength arcLength;
     double robotDistanceTravelled;
 
+    PID headingPID = new PID(0.4, 0.0, 0.0, -1.0, 1.0);
 
     public GuidingVectorField(Path path, ArrayList<Pose> guidePoints) {
         super(path);
@@ -96,7 +98,7 @@ public class GuidingVectorField extends Follower {
 
         Vector resultant = tangentVec.plus(crossTrackVec);
         double vectorAngle = tangentVec.angle();
-        double turnOutput = Angle.diff(robotPose.heading, vectorAngle) * 0.4;
+        double turnOutput = headingPID.run(Angle.diff(robotPose.heading, vectorAngle));
         double translationalVectorScalar = 1.0 - (2.0 * Math.abs(turnOutput));
         resultant = resultant.multiply(translationalVectorScalar);
 
