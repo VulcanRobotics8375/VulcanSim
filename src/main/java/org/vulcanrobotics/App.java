@@ -168,13 +168,14 @@ public class App extends Application {
 
     public static void main(String[] args) throws Exception {
         ArrayList<Pose> pathPoints = new ArrayList<>();
-        pathPoints.add(new Pose(0.0, 0.0, 0.0));
+        pathPoints.add(new Pose(0.0, 10.0, 0.0));
         pathPoints.add(new Pose(17.0, -12.0, 0.0));
         pathPoints.add(new Pose(40.0, -3.0, 0.0));
+        pathPoints.add(new Pose(70.0, 0.0, 0.0));
 
 
         BasicPath path = new BasicPath(pathPoints);
-        follower = new GuidingVectorField(path, pathPoints);
+        follower = new ContinuousLookAhead(path, pathPoints);
 
         launch();
 

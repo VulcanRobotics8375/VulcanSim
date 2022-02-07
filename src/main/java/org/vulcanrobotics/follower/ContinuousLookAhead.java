@@ -79,10 +79,10 @@ public class ContinuousLookAhead extends Follower{
         Pose robotPose = model.getRobotPose();
 
         distance.updatePos(robotPose.vector());
-        double targetX = 0;
-        double targetY = 0;
+        double targetX = robotPose.x;
+        double targetY = robotPose.y;
         try {
-            UnivariatePointValuePair min = optim.optimize(new MaxEval(1000), new UnivariateObjectiveFunction(distance), GoalType.MINIMIZE, new SearchInterval(0, spline.getKnots()[spline.getN()]));
+            UnivariatePointValuePair min = optim.optimize(new MaxEval(1000), new UnivariateObjectiveFunction(distance), GoalType.MINIMIZE, new SearchInterval(robotPose.x, spline.getKnots()[spline.getN()]));
 
             arcLength.updateStartX(min.getPoint());
 
@@ -94,7 +94,11 @@ public class ContinuousLookAhead extends Follower{
 
         double angleToPoint = Math.atan2(targetY - robotPose.y, targetX - robotPose.x);
         double turnOutput = headingPID.run(Angle.diff(robotPose.heading, angleToPoint));
+        double dist = FastMath.hypot(targetY - robotPose.y, targetX - robotPose.x);
         Pose velocityOut = new Pose(FastMath.cos(angleToPoint), FastMath.sin(angleToPoint), turnOutput);
+        if(dist < lookAhead) {
+            velocityOut = new Pose(velocityOut.vector().multiply(dist / lookAhead), turnOutput);
+        }
 
         double[] outputWheelVelocities = model.calculateWheelVelocities(MatrixUtils.createColumnRealMatrix(new double[]{velocityOut.x, velocityOut.y, velocityOut.heading}));
 
