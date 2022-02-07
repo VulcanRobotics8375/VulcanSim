@@ -1,5 +1,7 @@
 package org.vulcanrobotics.math.control;
 
+import org.vulcanrobotics.math.utils.Utils;
+
 public class PID {
     private double Kp, Ki, Kd;
     private double limMin, limMax;
@@ -26,21 +28,12 @@ public class PID {
         minNum = Math.max(proportional, limMin);
         maxNum = Math.min(proportional, limMax);
 
-        proportional = clip(proportional, limMin, limMax);
-        integral = clip(integral, minNum, maxNum);
+        proportional = Utils.clip(proportional, limMin, limMax);
+        integral = Utils.clip(integral, minNum, maxNum);
 
         lastError = error;
 
         return proportional + derivative + (Ki * integral);
     }
 
-    public double clip(double num, double min, double max){
-        if(num < min){
-            num = min;
-        }
-        if(num > max){
-            num = max;
-        }
-        return num;
-    }
 }

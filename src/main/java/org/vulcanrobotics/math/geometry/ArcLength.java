@@ -29,6 +29,31 @@ public class ArcLength implements UnivariateFunction {
         }
     }
 
+    public double solve(double desiredLength, double allowedError, double max, int numIterations) {
+        if (startX >= max || this.value(max) <= desiredLength) { return max; }
+
+        double endX = startX;
+        double increment = max - startX;
+        double arcLengthRunning = 0;
+        double arcLengthPiece;
+
+        for(int i = 0; i < numIterations; i++) {
+            arcLengthPiece = homer.integrate(10000000, integrand, endX, endX + increment);
+
+            if(arcLengthRunning + arcLengthPiece > desiredLength) {
+                increment /= 2;
+            } else {
+                arcLengthRunning += arcLengthPiece;
+                endX += increment;
+            }
+
+            if(FastMath.abs(arcLengthRunning - desiredLength) <= allowedError) {
+                break;
+            }
+        }
+        return endX;
+    }
+
     public void updateStartX(double startX) {
         this.startX = startX;
     }

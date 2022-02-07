@@ -36,6 +36,8 @@ public class App extends Application {
     private volatile boolean running = false;
     private Pose poseVelocity;
     private final Label poseVelocityLabel = new Label();
+    private Pose pose;
+    private final Label poseLabel = new Label();
     double robotWidth = 12, robotLength = 16;
     double elapsedTime = 0;
     public static Follower follower;
@@ -78,6 +80,7 @@ public class App extends Application {
         controlBox.getChildren().add(start);
         controlBox.getChildren().add(stop);
         controlBox.getChildren().add(poseVelocityLabel);
+        controlBox.getChildren().add(poseLabel);
 
         TabPane tabs = new TabPane();
         tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
@@ -142,8 +145,12 @@ public class App extends Application {
                     long elapsedTimeNS = System.nanoTime() - startTime;
                     long timeLeft = ((long)(model.getLoopTime() * 1000)) - (elapsedTimeNS / 1000000);
                     poseVelocity = model.getRobotPoseVelocity();
+                    pose = model.getRobotPose();
                     DecimalFormat df = new DecimalFormat("0.00");
-                    Platform.runLater(() -> poseVelocityLabel.setText("pose velocity: " + df.format(poseVelocity.x / model.getLoopTime()) + ", " + df.format(poseVelocity.y / model.getLoopTime()) + ", " + df.format(poseVelocity.heading / model.getLoopTime())));
+                    Platform.runLater(() -> {
+                            poseVelocityLabel.setText("pose velocity: " + df.format(poseVelocity.x / model.getLoopTime()) + ", " + df.format(poseVelocity.y / model.getLoopTime()) + ", " + df.format(poseVelocity.heading / model.getLoopTime()));
+                            poseLabel.setText("pose: " + df.format(pose.x) + ", " + df.format(pose.y) + ", " + df.format(pose.heading));
+                    });
                     if(timeLeft > 0) {
                         Thread.sleep(timeLeft);
                     }

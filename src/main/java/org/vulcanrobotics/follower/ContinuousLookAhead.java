@@ -1,6 +1,5 @@
 package org.vulcanrobotics.follower;
 
-import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.analysis.solvers.BisectionSolver;
@@ -18,6 +17,7 @@ import org.vulcanrobotics.math.geometry.ArcLength;
 import org.vulcanrobotics.math.geometry.Distance;
 import org.vulcanrobotics.math.geometry.Pose;
 import org.vulcanrobotics.math.utils.Angle;
+import org.vulcanrobotics.math.utils.Utils;
 import org.vulcanrobotics.path.Path;
 import org.vulcanrobotics.sim.drivetrains.Mecanum;
 import org.vulcanrobotics.sim.motors.Motor;
@@ -40,9 +40,8 @@ public class ContinuousLookAhead extends Follower{
     BisectionSolver solver = new BisectionSolver();
     Distance distance;
     ArcLength arcLength;
-    ArcLengthZero arcLengthZero;
 
-    PID headingPID = new PID(0.3, 0.0, 0.0, -1.0, 1.0);
+    PID headingPID = new PID(0.1, 0.0, 0.0, -1.0, 1.0);
 
     public ContinuousLookAhead(Path path, ArrayList<Pose> guidePoints) {
         super(path);
@@ -70,7 +69,6 @@ public class ContinuousLookAhead extends Follower{
         spline = interpolator.interpolate(x, y);
         distance = new Distance(spline);
         arcLength = new ArcLength(spline);
-        arcLengthZero = new ArcLengthZero();
 
         App.drawFunction(spline, 0, spline.getKnots()[spline.getN()]);
     }
@@ -81,19 +79,17 @@ public class ContinuousLookAhead extends Follower{
         distance.updatePos(robotPose.vector());
         double targetX = robotPose.x;
         double targetY = robotPose.y;
-        try {
-            UnivariatePointValuePair min = optim.optimize(new MaxEval(1000), new UnivariateObjectiveFunction(distance), GoalType.MINIMIZE, new SearchInterval(robotPose.x, spline.getKnots()[spline.getN()]));
 
-            arcLength.updateStartX(min.getPoint());
+        UnivariatePointValuePair min = optim.optimize(new MaxEval(100000), new UnivariateObjectiveFunction(distance), GoalType.MINIMIZE, new SearchInterval(0, spline.getKnots()[spline.getN()]));
 
-            targetX = solver.solve(100, arcLengthZero, min.getPoint() + 1, spline.getKnots()[spline.getN()]);
-            targetY = spline.value(targetX);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        arcLength.updateStartX(min.getPoint());
+        targetX = arcLength.solve(lookAhead, 0.0001, spline.getKnots()[spline.getN()], 1000);
+        targetY = spline.value(targetX);
 
         double angleToPoint = Math.atan2(targetY - robotPose.y, targetX - robotPose.x);
-        double turnOutput = headingPID.run(Angle.diff(robotPose.heading, angleToPoint));
+        // make target heading better
+        double targetHeading = spline.derivative().value(Utils.clip(robotPose.x, 0, spline.getKnots()[spline.getN()]));
+        double turnOutput = headingPID.run(Angle.diff(robotPose.heading, targetHeading));
         double dist = FastMath.hypot(targetY - robotPose.y, targetX - robotPose.x);
         Pose velocityOut = new Pose(FastMath.cos(angleToPoint), FastMath.sin(angleToPoint), turnOutput);
         if(dist < lookAhead) {
@@ -111,12 +107,5 @@ public class ContinuousLookAhead extends Follower{
         bl.setPower(powers[2]);
         br.setPower(powers[3]);
 
-    }
-
-    private class ArcLengthZero implements UnivariateFunction {
-        @Override
-        public double value(double x) {
-            return ContinuousLookAhead.this.arcLength.value(x) - ContinuousLookAhead.this.lookAhead;
-        }
     }
 }
