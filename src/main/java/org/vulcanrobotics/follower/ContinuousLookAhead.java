@@ -41,7 +41,7 @@ public class ContinuousLookAhead extends Follower{
     Distance distance;
     ArcLength arcLength;
 
-    PID headingPID = new PID(0.1, 0.0, 0.0, -1.0, 1.0);
+    PID headingPID = new PID(0.1, 0.0, 0.0, -Math.PI, Math.PI);
 
     public ContinuousLookAhead(Path path, ArrayList<Pose> guidePoints) {
         super(path);
